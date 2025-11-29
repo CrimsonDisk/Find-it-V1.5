@@ -1788,6 +1788,25 @@ function updateTimerDisplay() {
 function endGameTimeUp() {
     gameActive = false;
     canvasRight.style.cursor = 'not-allowed';
+    // Add AI fail feedback
+    const overlay = timeUpOverlay.querySelector('.win-message');
+    overlay.innerHTML = `<h2>⏰ Time's Up!</h2>
+        <p>Ooo... Try again, better luck next time!</p>
+        <div class="ai-tip"><strong>Tip:</strong> ${pickAITip()}</div>
+        <button id="restartAfterTimeUp">Restart with Same Settings</button>
+        <button id="backToMenuFromTimeUp">Back to Menu</button>`;
+    // Re-hook listeners (since buttons replaced)
+    document.getElementById('restartAfterTimeUp').onclick = () => {
+        timeUpOverlay.classList.add('hidden');
+        restartGame();
+    };
+    document.getElementById('backToMenuFromTimeUp').onclick = () => {
+        timeUpOverlay.classList.add('hidden');
+        isDailyChallenge = false;
+        seededRNG = null;
+        dailyBadge.classList.add('hidden');
+        showScreen(mainMenu);
+    };
     timeUpOverlay.classList.remove('hidden');
 }
 
@@ -1880,7 +1899,6 @@ function startDailyChallenge() {
 function endGameWin() {
     gameActive = false;
     canvasRight.style.cursor = 'not-allowed';
-    
     const finalScore = calculateFinalScore();
     const player = getCurrentPlayer();
     
@@ -1924,13 +1942,41 @@ function endGameWin() {
     savePlayerData();
     updatePlayerDisplay();
     
-    // Display score summary
-    differenceBonusesDisplay.textContent = finalScore.differenceBonuses;
-    comboBonusDisplay.textContent = finalScore.comboBonus;
-    timeBonusDisplay.textContent = finalScore.timeBonus;
-    roundScoreDisplay.textContent = finalScore.totalRoundScore;
-    timeRemainingDisplay.textContent = finalScore.timeRemaining;
-    
+    // Custom AI feedback for win
+    let comparisonMsg = '';
+    let aiTipWin = pickAITip();
+    // Compare to personal best and combos
+    if (finalScore.totalRoundScore > player.highestScore) {
+        comparisonMsg += `<div class='ai-congrats'>🏆 New High Score! 🥇</div>`;
+    } else {
+        comparisonMsg += `<div class='ai-congrats'>Awesome! You scored ${finalScore.totalRoundScore} points (Best: ${player.highestScore})</div>`;
+    }
+    comparisonMsg += `<div>Combo: <strong>${comboMultiplierValue.toFixed(1)}×</strong> | Time left: <strong>${finalScore.timeRemaining}s</strong></div>`;
+    // Insert dynamic win overlay message
+    const overlay = winOverlay.querySelector('.win-message');
+    overlay.innerHTML =
+        `<h2>🎉 You Win! 🎉</h2>
+        ${comparisonMsg}
+        <div class="score-summary">
+            <p><strong>Round Score Breakdown:</strong></p>
+            <p>Per-Difference Bonuses: <span id="differenceBonusesDisplay">${finalScore.differenceBonuses}</span> points</p>
+            <p>Combo Multiplier Bonus: <span id="comboBonusDisplay">${finalScore.comboBonus}</span> points</p>
+            <p>Time Bonus (seconds left × 3): <span id="timeBonusDisplay">${finalScore.timeBonus}</span> points</p>
+            <p><strong>Total Round Score: <span id="roundScoreDisplay">${finalScore.totalRoundScore}</span> points</strong></p>
+            <p>Time Remaining: <span id="timeRemainingDisplay">${finalScore.timeRemaining}</span> seconds</p>
+            <p id="dailyScoreNote" class="${isDailyChallenge ? '' : 'hidden'}"><em>Daily Challenge Score</em></p>
+        </div>
+        <div class="ai-tip"><strong>Tip:</strong> ${aiTipWin}</div>
+        <button id="newGameButton">Play Again</button>
+        <button id="backToMenuFromWin">Back to Menu</button>`;
+    document.getElementById('newGameButton').onclick = () => {
+        winOverlay.classList.add('hidden');
+        restartGame();
+    };
+    document.getElementById('backToMenuFromWin').onclick = () => {
+        winOverlay.classList.add('hidden');
+        showScreen(mainMenu);
+    };
     setTimeout(() => {
         winOverlay.classList.remove('hidden');
     }, 300);
@@ -2249,6 +2295,25 @@ backToMenuFromTimeUp.addEventListener('click', () => {
     dailyBadge.classList.add('hidden');
     showScreen(mainMenu);
 });
+
+// ===============
+// TIPS & FEEDBACK
+// ===============
+const AI_TIPS = [
+    "Try scanning both images in sections instead of darting your eyes randomly.",
+    "Want a better score? Try to look for shapes, not colors!",
+    "Quick glances can help you spot differences faster than staring.",
+    "Practice helps: you’ll get better at spotting subtle changes over time!",
+    "Focus on edges and corners—they often hide differences.",
+    "Keep an eye on repeating patterns; a missing detail might be there.",
+    "Mirroring the direction you scan from time to time can reveal what you missed.",
+    "When in doubt, use a hint! Hints are there to help improve your reaction time.",
+    "Don't rush! Sometimes taking a second to re-focus lets you see more.",
+    "Combos give big bonuses. Try to find differences in rapid succession!",
+];
+function pickAITip() {
+    return AI_TIPS[Math.floor(Math.random() * AI_TIPS.length)];
+}
 
 // ============================================
 // INITIALIZATION
