@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIND IT! - Find the Differences</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Main Menu Screen -->
+        <div id="mainMenu" class="screen active">
+            <h1 class="game-title">FIND IT!</h1>
+            <p class="splash-text" id="splashText">Loading...</p>
+            <div class="menu-buttons">
+                <button id="playButton" class="menu-btn">Play</button>
+                <button id="dailyChallengeButton" class="menu-btn">Daily Challenge</button>
+                <button id="leaderboardsButton" class="menu-btn">Leaderboards</button>
+                <button id="managePlayersButton" class="menu-btn">Manage Players</button>
+            </div>
+        </div>
+
+        <!-- Settings Panel (hidden initially) -->
+        <div id="settingsPanel" class="screen hidden">
+            <div class="control-panel">
+                <div class="control-group">
+                    <label for="difficultySelect">Difficulty:</label>
+                    <select id="difficultySelect">
+                        <option value="3">3 Differences</option>
+                        <option value="5" selected>5 Differences</option>
+                        <option value="10">10 Differences</option>
+                        <option value="15">15 Differences</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                    <input type="number" id="customDifficulty" min="1" max="50" placeholder="Custom" class="hidden">
+                </div>
+                
+                <div class="control-group">
+                    <label for="mapSizeSelect">Map Size:</label>
+                    <select id="mapSizeSelect">
+                        <option value="small">Small (400×300)</option>
+                        <option value="medium" selected>Medium (600×400)</option>
+                        <option value="large">Large (800×600)</option>
+                        <option value="huge">Huge (1000×800)</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                    <div id="customSizeInputs" class="hidden">
+                        <input type="number" id="customWidth" min="200" max="2000" placeholder="Width" style="width: 80px;">
+                        <span>×</span>
+                        <input type="number" id="customHeight" min="200" max="2000" placeholder="Height" style="width: 80px;">
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="timerSelect">Timer:</label>
+                    <select id="timerSelect">
+                        <option value="60" selected>60 seconds</option>
+                        <option value="180">180 seconds (3 min)</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                    <input type="text" id="customTimer" placeholder="e.g., 90 or 2m" class="hidden">
+                </div>
+                
+                <div class="control-group">
+                    <label style="font-weight: bold; margin-bottom: 10px; display: block;">Shape Types:</label>
+                    <div class="shape-options">
+                        <label><input type="checkbox" id="shapeCircle" checked> Circle</label>
+                        <label><input type="checkbox" id="shapeSquare" checked> Square</label>
+                        <label><input type="checkbox" id="shapeStar" checked> Star</label>
+                        <label><input type="checkbox" id="shapeBox" checked> Box</label>
+                        <label><input type="checkbox" id="shapeTriangle" checked> Triangle</label>
+                        <label><input type="checkbox" id="shapePentagon" checked> Pentagon</label>
+                        <label><input type="checkbox" id="shapeEgg" checked> Egg</label>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label style="font-weight: bold; margin-bottom: 10px; display: block;">Colors:</label>
+                    <div class="color-options">
+                        <label><input type="checkbox" id="colorRed" checked> Red</label>
+                        <label><input type="checkbox" id="colorBlue" checked> Blue</label>
+                        <label><input type="checkbox" id="colorOrange" checked> Orange</label>
+                        <label><input type="checkbox" id="colorGreen" checked> Green</label>
+                        <label><input type="checkbox" id="colorPurple" checked> Purple</label>
+                        <label><input type="checkbox" id="colorBlack" checked> Black</label>
+                        <label><input type="checkbox" id="colorCyan" checked> Cyan</label>
+                        <label><input type="checkbox" id="colorLime" checked> Lime</label>
+                        <label><input type="checkbox" id="colorBrown" checked> Brown</label>
+                    </div>
+                </div>
+                
+                <div class="control-group button-group">
+                    <button id="startButton">Start Game</button>
+                    <button id="backToMenuButton">Back to Menu</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="gameScreen" class="screen hidden">
+            <!-- Daily Challenge Badge -->
+            <div id="dailyBadge" class="daily-badge hidden">
+                <span>📅 Daily Challenge</span>
+            </div>
+
+            <!-- Score Display -->
+            <div class="score-display">
+                <div class="score-item">
+                    <span>Player: <strong id="currentPlayerDisplay">Guest</strong></span>
+                </div>
+                <div class="score-item">
+                    <span>Total Score: <strong id="totalScoreDisplay">0</strong></span>
+                </div>
+                <div class="score-item">
+                    <span>Highest Score: <strong id="highestScoreDisplay">0</strong></span>
+                </div>
+                <div class="score-item">
+                    <span>Games Played: <strong id="gamesPlayedDisplay">0</strong></span>
+                </div>
+            </div>
+            
+            <!-- Game Info -->
+            <div class="game-info">
+                <p>Differences found: <span id="foundCount">0</span> / <span id="totalCount">0</span></p>
+                <div class="timer-combo-container">
+                    <p class="timer-display">Time remaining: <span id="timerDisplay">--</span></p>
+                    <p class="combo-display" id="comboDisplay">Combo <span id="comboMultiplier">×1.0</span></p>
+                    <button id="hintButton" class="hint-button">💡 Hint</button>
+                </div>
+            </div>
+            
+            <div class="game-area">
+                <!-- Left canvas: Original image -->
+                <div class="canvas-wrapper">
+                    <h2>Original</h2>
+                    <canvas id="canvasLeft"></canvas>
+                </div>
+                
+                <!-- Right canvas: Modified image (clickable) -->
+                <div class="canvas-wrapper">
+                    <h2>Find Differences</h2>
+                    <canvas id="canvasRight"></canvas>
+                </div>
+            </div>
+
+            <div class="game-controls">
+                <button id="restartButton">Restart with Same Settings</button>
+                <button id="backToMenuFromGame">Back to Menu</button>
+            </div>
+        </div>
+
+        <!-- Leaderboards Screen -->
+        <div id="leaderboardsScreen" class="screen hidden">
+            <h2>Leaderboards</h2>
+            <div class="leaderboard-tabs">
+                <button class="tab-btn active" data-tab="overall">Overall</button>
+                <button class="tab-btn" data-tab="daily">Daily Challenge</button>
+            </div>
+            <div id="leaderboardContent" class="leaderboard-content"></div>
+            <button id="backFromLeaderboards" class="back-btn">Back to Menu</button>
+        </div>
+
+        <!-- Manage Players Screen -->
+        <div id="managePlayersScreen" class="screen hidden">
+            <h2>Manage Players</h2>
+            <div class="player-management">
+                <div class="current-player-section">
+                    <h3>Current Player: <span id="currentPlayerName">Guest</span></h3>
+                </div>
+                <div class="player-list-section">
+                    <h3>All Players</h3>
+                    <div id="playerList" class="player-list"></div>
+                </div>
+                <div class="player-actions">
+                    <input type="text" id="newPlayerName" placeholder="Enter player name" maxlength="20">
+                    <button id="createPlayerButton">Create New Player</button>
+                </div>
+                <div class="player-import-export">
+                    <button id="exportPlayerButton">Export Current Player</button>
+                    <button id="exportAllPlayersButton">Export All Players</button>
+                    <button id="importPlayerButton">Import Player</button>
+                    <input type="file" id="importPlayerFile" accept=".json" style="display: none;">
+                </div>
+            </div>
+            <button id="backFromPlayers" class="back-btn">Back to Menu</button>
+        </div>
+    </div>
+    
+    <!-- Win overlay -->
+    <div id="winOverlay" class="overlay hidden">
+        <div class="win-message">
+            <h2>🎉 You Win! 🎉</h2>
+            <div class="score-summary">
+                <p><strong>Round Score Breakdown:</strong></p>
+                <p>Per-Difference Bonuses: <span id="differenceBonusesDisplay">0</span> points</p>
+                <p>Combo Multiplier Bonus: <span id="comboBonusDisplay">0</span> points</p>
+                <p>Time Bonus (seconds left × 3): <span id="timeBonusDisplay">0</span> points</p>
+                <p><strong>Total Round Score: <span id="roundScoreDisplay">0</span> points</strong></p>
+                <p>Time Remaining: <span id="timeRemainingDisplay">0</span> seconds</p>
+                <p id="dailyScoreNote" class="hidden"><em>Daily Challenge Score</em></p>
+            </div>
+            <button id="newGameButton">Play Again</button>
+            <button id="backToMenuFromWin">Back to Menu</button>
+        </div>
+    </div>
+    
+    <!-- Time's Up overlay -->
+    <div id="timeUpOverlay" class="overlay hidden">
+        <div class="win-message">
+            <h2>⏰ Time's Up!</h2>
+            <p>Try again to find all the differences!</p>
+            <button id="restartAfterTimeUp">Restart with Same Settings</button>
+            <button id="backToMenuFromTimeUp">Back to Menu</button>
+        </div>
+    </div>
+    
+    <!-- Fact Quiz Modal for Hints -->
+    <div id="mathQuestionModal" class="overlay hidden">
+        <div class="win-message">
+            <h2>💡 Get a Hint</h2>
+            <p>Answer this quiz to reveal a difference:</p>
+            <div class="math-question">
+                <p id="mathQuestionText">Loading quiz...</p>
+                <input id="mathAnswerInput" placeholder="Your answer or letter" style="padding: 10px; font-size: 1.2em; width: 200px; text-align: center; margin: 10px 0;" type="text">
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button id="submitMathAnswer">Submit</button>
+                    <button id="cancelMathQuestion">Cancel</button>
+                </div>
+                <p id="mathFeedback" style="margin-top: 10px; font-weight: bold;"></p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="main.js"></script>
+</body>
+</html>
