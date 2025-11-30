@@ -1998,7 +1998,7 @@ function restartGame() {
 // GEMINI FACT QUIZ SETUP
 // ============================================
 
-const GEMINI_API_KEY = "AIzaSyAUZBwArUrhCMfloZszezpoAU9jxerz9Ug"; 
+const GEMINI_API_KEY = "Place your Gemini API key here"; 
 const GEMINI_MODEL = "gemini-2.5-flash"; 
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
@@ -2327,3 +2327,4 @@ showScreen(mainMenu);
 // Make functions available globally for onclick handlers
 window.switchPlayer = switchPlayer;
 window.deletePlayer = deletePlayer;
+
